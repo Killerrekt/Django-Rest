@@ -5,7 +5,8 @@ from django.http import JsonResponse
 def auth_middleware(get_response):
     def middleware(request):
         unprotected_routes = ['/ping/', '/login/', '/signup/','/refresh/']
-        owner_routes = ['/owner/create-user','/owner/set-flag']
+        owner_routes = ['/owner/create-user/','/owner/set-flag/']
+        admin_routes = ['/admin/create-article/','/admin/update-article/','/admin/delete-article/']
 
         if request.path not in unprotected_routes:
             auth_header = request.headers.get('Authorization')
@@ -29,7 +30,10 @@ def auth_middleware(get_response):
 
                 if request.path in owner_routes:
                     if user.role != "owner":
-                        return JsonResponse({"error":"Not a owner trying to access owner routes"})
+                        return JsonResponse({"error":"Not a owner trying to access owner routes"},status=401)
+                elif request.path in admin_routes:
+                    if user.role not in ["owner","admin"]:
+                        return JsonResponse({"error":"Not a owner or admin is trying to access admin routes"},status=401)
 
                 request.info = user
 

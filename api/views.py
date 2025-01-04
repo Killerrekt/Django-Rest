@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password,check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
-from .models import User
+from .models import User,Article
 from .serializer import UserSerializer
 
 #Feature list:-
@@ -96,3 +96,45 @@ def SetFeatureFlag(request):
     if tag in [True,False]:
         tag_feature = tag
     return Response({"message":"Updated the flag"})
+
+@api_view(['POST'])
+def CreateArticle(request):
+    data = request.data
+    title = data.get("title")
+    content = data.get("content")
+    tags = data.get("tags")
+    author = data.get("author")
+    try:
+        Article.objects.create(title=title,content=content,tags=tags,author=User.objects.filter(id=author).first())
+    except Exception as e:
+        return Response({"message":"Failed to create the article","error":str(e)},status=500)
+    return Response({"message":"Article created successfully"})
+
+@api_view(['PUT'])
+def UpdateArticle(request):
+    data = request.data
+    title = data.get("title")
+    content = data.get("content")
+    tags = data.get("tags")
+    author = data.get("author")
+    id = data.get("id")
+    try:
+        article = Article.objects.filter(id=id).first()
+        article.title = title
+        article.content = content
+        article.tags = tags
+        article.author = User.objects.filter(id=author).first()
+        article.save()
+    except Exception as e:
+        return Response({"message":"Failed to  the article","error":str(e)},status=500)
+    return Response({"message":"Article Updated successfully"})
+
+@api_view(['DELETE'])
+def DeleteArticle(request):
+    data = request.data
+    id = data.get("id")
+    try:
+        Article.objects.filter(id = id).delete()
+    except Exception as e:
+        return Response({"message":"Failed to delete the article", "error":str(e)},status=500)
+    return Response({"message":"Article deleted successfully"})
