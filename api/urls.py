@@ -7,5 +7,9 @@ urlpatterns = [
     path('signup/',views.SignUp),
     path('login/',views.Login),
     path('protected/',views.Protected),
-    path('refresh/',TokenRefreshView.as_view())
+    path('refresh/',TokenRefreshView.as_view()),
+    path('feature/',views.ServerFeatureStatus),
+    
+    path('owner/create-user',views.CreateUser),
+    path('owner/set-flag',views.SetFeatureFlag)
 ]

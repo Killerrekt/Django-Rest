@@ -6,6 +6,10 @@ from rest_framework.decorators import api_view
 from .models import User
 from .serializer import UserSerializer
 
+#Feature list:-
+gen_feature = False
+tag_feature = False
+
 @api_view(['GET'])
 def Ping(request):
     msg = {"message":"Pong"}
@@ -56,3 +60,39 @@ def Protected(request):
     msg = {"message":"Secret Message","data":UserSerializer(request.info).data}
     return Response(data=msg)
 
+@api_view(['POST'])
+def CreateUser(request):
+    data = request.data
+    username = data.get('name')
+    email = data.get('email')
+    password = make_password(data.get('password'))
+    role = data.get('role')
+    if role not in ['admin','member']:
+        return Response(data={"message":"the role can only be either admin or member"},status=400)
+    try:
+        User.objects.create(name = username, password = password,email = email,role = role)
+    except IntegrityError as e:
+        return Response(data={"message":"missing some data or email is in use", "error":str(e)},status=400)
+    except Exception as e:
+        return Response(data = {"message":"something went wrong will inserting into the database","error":e},status=500)
+    return Response({"message" : "User created successfully"})
+
+@api_view(['GET'])
+def ServerFeatureStatus(request):
+    return Response(data={"message" : "Successfully got the feature details","data":{
+        "article_generation" : gen_feature,
+        "tag_generation" : tag_feature
+    }})
+    
+@api_view(['POST'])
+def SetFeatureFlag(request):
+    global gen_feature, tag_feature
+    
+    data = request.data
+    gen = data.get('gen_feature')
+    if gen in [True,False]:
+        gen_feature = gen
+    tag = data.get('tag_feature')
+    if tag in [True,False]:
+        tag_feature = tag
+    return Response({"message":"Updated the flag"})

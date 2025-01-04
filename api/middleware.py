@@ -5,6 +5,7 @@ from django.http import JsonResponse
 def auth_middleware(get_response):
     def middleware(request):
         unprotected_routes = ['/ping/', '/login/', '/signup/','/refresh/']
+        owner_routes = ['/owner/create-user','/owner/set-flag']
 
         if request.path not in unprotected_routes:
             auth_header = request.headers.get('Authorization')
@@ -25,6 +26,10 @@ def auth_middleware(get_response):
                         {'error': 'User not found'}, 
                         status=404
                     )
+
+                if request.path in owner_routes:
+                    if user.role != "owner":
+                        return JsonResponse({"error":"Not a owner trying to access owner routes"})
 
                 request.info = user
 
