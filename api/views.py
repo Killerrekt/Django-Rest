@@ -53,6 +53,6 @@ def Login(request):
     
 @api_view(['GET'])
 def Protected(request):
-    print(request.user)
     msg = {"message":"Secret Message","data":UserSerializer(request.info).data}
-    return Response(msg)
+    return Response(data=msg)
+
