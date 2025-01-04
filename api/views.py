@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password,check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
 from .models import User,Article
-from .serializer import UserSerializer
+from .serializer import UserSerializer,ArticleSerializer
 
 #Feature list:-
 gen_feature = False
@@ -138,3 +138,22 @@ def DeleteArticle(request):
     except Exception as e:
         return Response({"message":"Failed to delete the article", "error":str(e)},status=500)
     return Response({"message":"Article deleted successfully"})
+
+@api_view(['GET'])
+def GetAllArticle(request):
+    try:
+        articles = Article.objects.all()
+        data = ArticleSerializer(articles,many=True)
+    except Exception as e:
+        return Response({"message":"Failed to get the articles","error":str(e)},status=500)
+    return Response({"message":"Successfully got the articles","data":data.data})
+
+@api_view(['GET'])
+def GetArticle(request):
+    id = request.query_params.get("id")
+    try:
+        articles = Article.objects.filter(id = id).first()
+        data = ArticleSerializer(articles)
+    except Exception as e:
+        return Response({"message":"Failed to get the article","error":str(e)},status=500)
+    return Response({"message":"Successfully got the article","data":data.data})

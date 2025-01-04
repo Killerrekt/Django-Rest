@@ -15,5 +15,8 @@ urlpatterns = [
     
     path('admin/create-article/',views.CreateArticle),
     path('admin/update-article/',views.UpdateArticle),
-    path('admin/delete-article/',views.DeleteArticle)
+    path('admin/delete-article/',views.DeleteArticle),
+    
+    path('article-all/',views.GetAllArticle),
+    path('article/',views.GetArticle)
 ]
