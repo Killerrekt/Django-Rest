@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from django.db import IntegrityError
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password,check_password
+from rest_framework_simplejwt.tokens import RefreshToken # type: ignore
 from rest_framework.decorators import api_view
 from .models import User
 
@@ -27,3 +28,24 @@ def SignUp(request):
     except Exception as e:
         return Response(data = {"message":"something went wrong will inserting into the database","error":e},status=500)
     return Response({"message" : "User signup successfully"})
+
+@api_view(['POST'])
+def Login(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+    try:
+        user = User.objects.filter(email=email).first()
+        check = check_password(password,user.password)
+        print(check)
+        if not user or not check:
+            return Response(data = {"message":"invalid email or password"},status=400)
+    except Exception as e:
+        return Response(data = {"message":"something went wrong","error":str(e)},status=500)
+    
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        "message" : "logged in successfully",
+        "data":{
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+    }})   
