@@ -1,9 +1,10 @@
 from rest_framework.response import Response
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password,check_password
-from rest_framework_simplejwt.tokens import RefreshToken # type: ignore
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
 from .models import User
+from .serializer import UserSerializer
 
 @api_view(['GET'])
 def Ping(request):
@@ -48,4 +49,10 @@ def Login(request):
         "data":{
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-    }})   
+    }})
+    
+@api_view(['GET'])
+def Protected(request):
+    print(request.user)
+    msg = {"message":"Secret Message","data":UserSerializer(request.info).data}
+    return Response(msg)

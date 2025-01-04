@@ -4,5 +4,6 @@ from . import views
 urlpatterns = [
     path('ping/',views.Ping),
     path('signup/',views.SignUp),
-    path('login/',views.Login)
+    path('login/',views.Login),
+    path('protected/',views.Protected)
 ]
