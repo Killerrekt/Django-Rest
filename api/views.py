@@ -3,8 +3,8 @@ from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password,check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
-from .models import User,Article
-from .serializer import UserSerializer,ArticleSerializer
+from .models import User,Article,Comment
+from .serializer import UserSerializer,ArticleSerializer,CommentPopulatedArticleSerializer
 
 #Feature list:-
 gen_feature = False
@@ -103,7 +103,8 @@ def CreateArticle(request):
     title = data.get("title")
     content = data.get("content")
     tags = data.get("tags")
-    author = data.get("author")
+    #author = data.get("author")
+    author = request.info.id
     try:
         Article.objects.create(title=title,content=content,tags=tags,author=User.objects.filter(id=author).first())
     except Exception as e:
@@ -153,7 +154,20 @@ def GetArticle(request):
     id = request.query_params.get("id")
     try:
         articles = Article.objects.filter(id = id).first()
-        data = ArticleSerializer(articles)
+        data = CommentPopulatedArticleSerializer(articles)
     except Exception as e:
         return Response({"message":"Failed to get the article","error":str(e)},status=500)
     return Response({"message":"Successfully got the article","data":data.data})
+
+@api_view(['POST'])
+def WriteComment(request):
+    data = request.data
+    content = data.get('content')
+    article = Article.objects.filter(id = data.get('article')).first()
+    user = User.objects.filter(id = request.info.id).first()
+    try:
+        Comment.objects.create(content = content,article = article,user = user)
+    except Exception as e:
+        return Response({"message":"Failed to save the comment","error":str(e)},status=500)
+    return Response({"message":"comment saved successfully"})
+    
