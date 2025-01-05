@@ -5,6 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
 from .models import User,Article,Comment
 from .serializer import UserSerializer,ArticleSerializer,CommentPopulatedArticleSerializer
+from .gen_api import GenApi
 
 #Feature list:-
 gen_feature = False
@@ -102,14 +103,27 @@ def CreateArticle(request):
     data = request.data
     title = data.get("title")
     content = data.get("content")
+    generate_content = data.get("generate_article")
+    generate_tags = data.get("generate_tag")
     tags = data.get("tags")
-    #author = data.get("author")
     author = request.info.id
+    text_content = "Can u generate a article on {title} and in plain text no need for markdown".format(title = title)
+    if generate_content == True:
+        if gen_feature:
+            content = GenApi(text_content)
+        else:
+            return Response({"message" : "Gen article feature is disabled"})
+    if generate_tags == True:
+        if tag_feature:
+            text_tag = "Can u generate appropriate tags for the following article. It shld be , separated.{content}".format(content = content)
+            tags = GenApi(text_tag)
+        else:
+            return Response({"message":"Tag feature is disabled"})
     try:
-        Article.objects.create(title=title,content=content,tags=tags,author=User.objects.filter(id=author).first())
+        article = Article.objects.create(title=title,content=content,tags=tags,author=User.objects.filter(id=author).first())
     except Exception as e:
         return Response({"message":"Failed to create the article","error":str(e)},status=500)
-    return Response({"message":"Article created successfully"})
+    return Response({"message":"Article created successfully","data" :ArticleSerializer(article).data})
 
 @api_view(['PUT'])
 def UpdateArticle(request):
@@ -171,3 +185,7 @@ def WriteComment(request):
         return Response({"message":"Failed to save the comment","error":str(e)},status=500)
     return Response({"message":"comment saved successfully"})
     
+@api_view(['POST'])
+def GenArticle(request):
+    prompt = request.data.get('prompt')
+    return Response({"message":"Success","data":GenApi(prompt)})

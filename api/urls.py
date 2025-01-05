@@ -19,5 +19,7 @@ urlpatterns = [
     
     path('article-all/',views.GetAllArticle),
     path('article/',views.GetArticle),
-    path('comment/',views.WriteComment)
+    path('comment/',views.WriteComment),
+    
+    path('testing/',views.GenArticle)
 ]

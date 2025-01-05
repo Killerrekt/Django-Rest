@@ -10,7 +10,7 @@ class User(models.Model):
 class Article(models.Model):
     title = models.CharField(max_length=255, null=False, blank=False)
     content = models.TextField(null=False, blank=False)
-    tags = models.CharField(max_length=255, null=True, blank=True)
+    tags = models.TextField(max_length=255, null=True, blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='articles')
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False)
     updated_at = models.DateTimeField(auto_now=True, null=False, blank=False)
